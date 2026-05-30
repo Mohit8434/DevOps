@@ -1,0 +1,54 @@
+
+services:
+  # 1. MySQL Database Container
+  db:
+    image: mysql:8.0
+    container_name: taskflow-mysql
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=mohit8434
+      - MYSQL_DATABASE=todo_db
+    ports:
+      # Exposes container port 3306 on host port 3307 to avoid host port conflicts
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -pmohit8434 || exit 1"]
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+
+  # 2. Spring Boot Backend Container
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: taskflow-backend
+    restart: always
+    ports:
+      - "8082:8082"
+    environment:
+      - DB_URL=jdbc:mysql://db:3306/todo_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - DB_USER=root
+      - DB_PASSWORD=mohit8434
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # 3. React Frontend Container (Served via Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: taskflow-frontend
+    restart: always
+    ports:
+      # Map container Nginx port 80 to host port 5173
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql-data:
+    driver: local
