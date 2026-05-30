@@ -175,7 +175,7 @@ export default function Dashboard({ userId, onLogout }) {
           </div>
           <div>
             <h1 className="welcome-title">Workspace: <span className="gradient-text">{userId}</span></h1>
-            <p className="welcome-subtitle">Mohit Raj kumar</p>
+            <p className="welcome-subtitle">Mohit Raj gupta</p>
           </div>
         </div>
         <button onClick={onLogout} className="btn btn-secondary btn-logout">
